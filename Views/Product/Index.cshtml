@@ -1,0 +1,178 @@
+@model PagedList.Core.IPagedList<WebApplicationTest.Models.Product>
+@using PagedList.Core.Mvc
+
+@{
+    ViewData["Title"] = "Product List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var pageSize = ViewBag.PageSize;
+    var totalItems = ViewBag.TotalItems;
+    var startItem = ViewBag.StartItem;
+    var endItem = ViewBag.EndItem;
+}
+
+<nav class="navbar navbar-expand-lg navbar-light border-bottom px-5">
+  <a class="navbar-brand" href="#">
+    <img src="~/themes/assets/images/logo.svg" alt="JustDo" />
+  </a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ms-auto d-flex align-items-center">
+      <li class="nav-item">
+        <a
+          class="nav-link px-3"
+          href="https://demo.bootstrapdash.com/justdo/docs/documentation.html"
+          target="_blank">
+          Documentation
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link px-3 btn btn-outline-primary" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Product List</h4>
+                    <p class="card-description">
+                        Showing <span class="font-weight-bold">@startItem-@endItem</span> of <span class="font-weight-bold">@totalItems</span> records
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Product Name</th>
+                                    <th>Description</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Created Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Id</td>
+                                        <td>@item.Name</td>
+                                        <td>@item.Description</td>
+                                        <td>¥@item.Price.ToString("N2")</td>
+                                        <td>@item.Stock</td>
+                                        <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                        <td>
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">Details</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-inline">
+                                <label class="mr-2">Show per page:</label>
+                                <select id="pageSizeSelector" class="form-control form-control-sm" onchange="changePageSize(this.value)">
+                                    @if (pageSize == 5)
+                                    {
+                                        <option value="5" selected>5</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="5">5</option>
+                                    }
+                                    
+                                    @if (pageSize == 10)
+                                    {
+                                        <option value="10" selected>10</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="10">10</option>
+                                    }
+                                    
+                                    @if (pageSize == 20)
+                                    {
+                                        <option value="20" selected>20</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="20">20</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="float-end">
+                                @*Paging*@
+                                <nav>
+                                    <ul class="pagination justify-content-end">
+                                        @if (Model.HasPreviousPage)
+                                        {
+                                            <li class="page-item"><a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber - 1, pageSize = pageSize })">Previous</a></li>
+                                        }
+                                        else
+                                        {
+                                            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                                        }
+                                        @if (Model.PageCount > 1)
+                                        {
+                                            for (int i = 1; i <= Model.PageCount; i++)
+                                            {
+                                                if (i == Model.PageNumber)
+                                                {
+                                                    <li class="page-item active"><a class="page-link" href="#">@i</a></li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="page-item"><a class="page-link" href="@Url.Action("Index", new { page = i, pageSize = pageSize })">@i</a></li>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <li class="page-item disabled"><a class="page-link" href="#">1</a></li>
+                                        }
+                                        @if (Model.HasNextPage)
+                                        {
+                                            <li class="page-item"><a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber + 1, pageSize = pageSize })">Next</a></li>
+                                        }
+                                        else
+                                        {
+                                            <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changePageSize(size) {
+            window.location.href = '@Url.Action("Index", "Product")?page=1&pageSize=' + size;
+        }
+    </script>
+}
